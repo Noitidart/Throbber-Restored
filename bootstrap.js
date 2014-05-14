@@ -17,25 +17,30 @@ XPCOMUtils.defineLazyGetter(myServices, 'sss', function(){ return Cc['@mozilla.o
 
 var workers = [];
 
-var mutConfig = {attributes: true};
-function mutFunc(ms) {
-	for (var m of ms) {
-		if (m.attributeName == 'busy' || m.attributeName == 'progress') {
-			console.log('m.attributeName pass = ', m.attributeName);
-			var attVal = m.target.getAttribute(m.attributeName);
-			console.log('attVal = ', attVal);
-			if (attVal == 'true') {
-				var gThrobber = null;
-			}
-		}
-	}
-}
+const gMutationConfig = {attributes:true, attributeOldValue:true};
 
 function winWorker(aDOMWindow) {
 	this.DOMWindow = aDOMWindow;
 	this.DOMDocument = this.DOMWindow.document;
 	this.gBrowser = this.DOMWindow.gBrowser;
 	this.gThrobber = this.DOMDocument.getElementById('navigator-throbber');
+	
+	
+	this.gMutationFunc = function(ms) {
+		for(let m of ms) {
+			if(m.attributeName == 'busy') {
+				console.log('m.attributeName = ', m.attributeName, 'm.oldValue = ', m.oldValue);
+				if (m.oldValue == 'true') {
+					this.gThrobber.removeAttribute('loading');
+				} else {
+					this.gThrobber.setAttribute('loading', 'true');
+				}
+				break;
+			}
+		}
+	};
+	
+	this.gMutationObserver = new this.DOMWindow.MutationObserver(this.gMutationFunc.bind(this));
 	
 	if (!this.gBrowser) {
 		console.error('this window does not have gBrowser');
@@ -47,46 +52,33 @@ function winWorker(aDOMWindow) {
 		console.warn('this window does not have tabContainer, but just an exception/warning NOT an error');
 	}
 	
-	/* this.handleEvent = function(e) {
-		switch(e.type) {
-			case 'TabSelect':
-				console.log('tab seld yaaa ' + new Date().getTime());
-				var tab = e.target;
-				//var browser = tab.linkedBrowser;
-				var throbber = tab.ownerDocument.getAnonymousElementByAttribute(tab, 'class', 'tab-throbber')
-				if (throbber.hasAttribute('busy')) {
-					this.gThrobber.setAttribute('loading', 'true');
-				} else {
-					this.gThrobber.removeAttribute('loading');
-				}
-				
-				break;
-			default:
-				console.error('e.type not recognized in hanldeEvent', 'e.type = ', e.type);
-		}
-	} */
-	
 	this.onTabSelect = function(e) {
-			console.log('tab seld yaaa ' + new Date().getTime());
-				var tab = e.target;
-				//var browser = tab.linkedBrowser;
-				var throbber = tab.ownerDocument.getAnonymousElementByAttribute(tab, 'class', 'tab-throbber')
-				if (throbber.hasAttribute('busy')) {
-					this.gThrobber.setAttribute('loading', 'true');
-				} else {
-					this.gThrobber.removeAttribute('loading');
-				}
-	}
+		console.log('tab seld yaaa ' + new Date().getTime());
+		this.gMutationObserver.disconnect();
+		var tab = e.target;
+		var throbber = tab.ownerDocument.getAnonymousElementByAttribute(tab, 'class', 'tab-throbber')
+		this.gMutationObserver.observe(throbber, gMutationConfig);
+		
+		if (throbber.hasAttribute('busy')) {
+			this.gThrobber.setAttribute('loading', 'true');
+		} else {
+			this.gThrobber.removeAttribute('loading');
+		}
+	};
 	
 	this.onTabSelectBinded = this.onTabSelect.bind(this);
 	
 	this.init = function() {
 		this.gBrowser.tabContainer.addEventListener('TabSelect', this.onTabSelectBinded, false);
-	}
+		var tab = this.gBrowser.selectedTab;
+		var throbber = tab.ownerDocument.getAnonymousElementByAttribute(tab, 'class', 'tab-throbber')
+		this.gMutationObserver.observe(throbber, gMutationConfig);
+	};
 	
 	this.destroy = function() {
+		this.gMutationObserver.disconnect();
 		this.gBrowser.tabContainer.removeEventListener('TabSelect', this.onTabSelectBinded, false);
-	}
+	};
 }
 
 /*start - windowlistener*/

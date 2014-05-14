@@ -56,10 +56,10 @@ function winWorker(aDOMWindow) {
 		console.log('tab seld yaaa ' + new Date().getTime());
 		this.gMutationObserver.disconnect();
 		var tab = e.target;
-		var throbber = tab.ownerDocument.getAnonymousElementByAttribute(tab, 'class', 'tab-throbber')
-		this.gMutationObserver.observe(throbber, gMutationConfig);
+		//var throbber = tab.ownerDocument.getAnonymousElementByAttribute(tab, 'class', 'tab-throbber')
+		this.gMutationObserver.observe(tab, gMutationConfig);
 		
-		if (throbber.hasAttribute('busy')) {
+		if (tab.hasAttribute('busy')) {
 			this.gThrobber.setAttribute('loading', 'true');
 		} else {
 			this.gThrobber.removeAttribute('loading');
@@ -71,8 +71,8 @@ function winWorker(aDOMWindow) {
 	this.init = function() {
 		this.gBrowser.tabContainer.addEventListener('TabSelect', this.onTabSelectBinded, false);
 		var tab = this.gBrowser.selectedTab;
-		var throbber = tab.ownerDocument.getAnonymousElementByAttribute(tab, 'class', 'tab-throbber');
-		this.gMutationObserver.observe(throbber, gMutationConfig);
+		//var throbber = tab.ownerDocument.getAnonymousElementByAttribute(tab, 'class', 'tab-throbber');
+		this.gMutationObserver.observe(tab, gMutationConfig);
 		
 		// var gThrobberIcon = this.gThrobber.ownerDocument.getAnonymousElementByAttribute(this.gThrobber, 'class', 'toolbarbutton-icon');
 		// gThrobberIcon.removeAttribute('class');

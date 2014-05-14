@@ -1,0 +1,17 @@
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+
+@-moz-document url("chrome://browser/content/browser.xul") {
+  #navigator-throbber {
+    list-style-image: url("chrome://throbber-restored/content/notloading_16.png");
+  }
+  
+  #navigator-throbber[loading] {
+    list-style-image: url("chrome://throbber-restored/content/loading_16.png");
+  }
+
+  /* Necessary to mimic the behavior of all other buttons, which are darker when
+    pressed.
+  #navigator-throbber:hover:active:not([disabled="true"]):not([cui-areatype="menu-panel"]) {
+    list-style-image: url("chrome://aus-hello/skin/icon32-dark.png");
+  }*/
+}

@@ -5,19 +5,44 @@
     list-style-image: url("chrome://throbber-restored/content/notloading_16.png");
   }
   
-  /*start - this needs to be done because i remove the toolbarbutton-icon class from the image to prevent the active and hover styling*/
-  #navigator-throbber > image {
-	border: 1px solid transparent;
-	border-radius: 2px;
-	box-shadow: transparent 0px 1px 0px 0px inset, transparent 0px 1px 0px 0px, transparent 0px 0px 2px 0px;
-	height: 24px;
-	padding: 3px 7px;
-	perspective-origin: 16px 12px;
-	transform-origin: 16px 12px;
-	transition-property: background-color, border-color, box-shadow;
-	width: 32px;
+  /*start - make not clickable style meaning no hover and no active*/
+  /*start - when in nav-bar*/
+  toolbar[id="nav-bar"] * #navigator-throbber[cui-areatype="toolbar"] > image {
+	border: 1px solid transparent !important;
+	border-radius: 2px !important;
+	box-shadow: transparent 0px 1px 0px 0px inset, transparent 0px 1px 0px 0px, transparent 0px 0px 2px 0px !important;
+	height: 24px !important;
+	padding: 3px 7px !important;
+	perspective-origin: 16px 12px !important;
+	transform-origin: 16px 12px !important;
+	transition-property: background-color, border-color, box-shadow !important;
+	width: 32px !important;
+	background-image: none !important;
+	background-color: transparent !important;
+	transition-duration: 0.15s !important;
   }
-  /*end - this needs to be done because i remove the toolbarbutton-icon class from the image to prevent the active and hover styling*/
+  /*start - when in PanelUI-popup*/
+  #navigator-throbber[cui-areatype="menu-panel"] {
+	background-color: transparent !important;
+	border-color: transparent !important;
+  }
+  /*start - handle when in tabs bar*/
+  toolbar[id="TabsToolbar"] > #navigator-throbber[cui-areatype="toolbar"] {
+	background-image: none !important;
+	background-position: 0% 0% !important;
+	background-size: auto auto !important;
+	/*background-repeat: repeat;*/ /*this is the normal value but i just left it out, the on hover value is no-repeat*/
+	border-color: transparent !important;
+  }
+  /*start - handle when in bookmarks bar, toolbar-menubar (file view tools etc), and all other toolbars (just not tabstoolbar or navbar, in navbar its not direct descdent but grandchild so the > makes the different)*/
+  toolbar:not([id="TabsToolbar"]) > #navigator-throbber[cui-areatype="toolbar"] {
+	padding: 3px !important;
+	-moz-appearance: none !important; /*otherwise i cant edit border-color, weird i know but this is what made it work*/
+	border-color: transparent !important;
+	outline: none !important;
+	outline-offset: 0 !important;
+  }
+  /*end - make not clickable style meaning no hover and no active*/
   
   #navigator-throbber[loading] {
     list-style-image: url("chrome://throbber-restored/content/loading_16.png");

@@ -74,8 +74,8 @@ function winWorker(aDOMWindow) {
 		var throbber = tab.ownerDocument.getAnonymousElementByAttribute(tab, 'class', 'tab-throbber');
 		this.gMutationObserver.observe(throbber, gMutationConfig);
 		
-		var gThrobberIcon = this.gThrobber.ownerDocument.getAnonymousElementByAttribute(this.gThrobber, 'class', 'toolbarbutton-icon');
-		gThrobberIcon.removeAttribute('class');
+		// var gThrobberIcon = this.gThrobber.ownerDocument.getAnonymousElementByAttribute(this.gThrobber, 'class', 'toolbarbutton-icon');
+		// gThrobberIcon.removeAttribute('class');
 	};
 	
 	this.destroy = function() {
@@ -164,10 +164,23 @@ function startup(aData, aReason) {
 	self.aData = aData; //must go first, because functions in loadIntoWindow use self.aData
 	
 	CustomizableUI.createWidget({ //must run createWidget before windowListener.register because the register function needs the button added first
-		id : 'navigator-throbber',
-		defaultArea : CustomizableUI.AREA_NAVBAR,
-		label : 'Activity Indicator',
-		overflows: false
+		id: 'wrapper-navigator-throbber',
+		type: 'custom',
+		defaultArea: CustomizableUI.AREA_NAVBAR,
+		onBuild: function(aDocument) {
+			console.log('onBuild this = ', this);
+			 let node = aDocument.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'toolbarbutton');
+			 var props = {
+				id: 'navigator-throbber',
+				overflows: false,
+				label: 'Activity Indicator',
+				
+			 };
+			 for (var p in props) {
+				node.setAttribute(p, props[p]);
+			 }
+			 return node;
+		}
 	});
 	
 	var newURIParam = {

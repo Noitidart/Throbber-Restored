@@ -71,9 +71,11 @@ function winWorker(aDOMWindow) {
 	this.init = function() {
 		this.gBrowser.tabContainer.addEventListener('TabSelect', this.onTabSelectBinded, false);
 		var tab = this.gBrowser.selectedTab;
-		var throbber = tab.ownerDocument.getAnonymousElementByAttribute(tab, 'class', 'tab-throbber')
+		var throbber = tab.ownerDocument.getAnonymousElementByAttribute(tab, 'class', 'tab-throbber');
 		this.gMutationObserver.observe(throbber, gMutationConfig);
 		
+		var gThrobberIcon = this.gThrobber.ownerDocument.getAnonymousElementByAttribute(this.gThrobber, 'class', 'toolbarbutton-icon');
+		gThrobberIcon.removeAttribute('class');
 	};
 	
 	this.destroy = function() {

@@ -5,10 +5,24 @@
     list-style-image: url("chrome://throbber-restored/content/notloading_16.png");
   }
   
+  /*start - this needs to be done because i remove the toolbarbutton-icon class from the image to prevent the active and hover styling*/
+  #navigator-throbber > image {
+	border: 1px solid transparent;
+	border-radius: 2px;
+	box-shadow: transparent 0px 1px 0px 0px inset, transparent 0px 1px 0px 0px, transparent 0px 0px 2px 0px;
+	height: 24px;
+	padding: 3px 7px;
+	perspective-origin: 16px 12px;
+	transform-origin: 16px 12px;
+	transition-property: background-color, border-color, box-shadow;
+	width: 32px;
+  }
+  /*end - this needs to be done because i remove the toolbarbutton-icon class from the image to prevent the active and hover styling*/
+  
   #navigator-throbber[loading] {
     list-style-image: url("chrome://throbber-restored/content/loading_16.png");
   }
-
+  
   /* Necessary to mimic the behavior of all other buttons, which are darker when
     pressed.
   #navigator-throbber:hover:active:not([disabled="true"]):not([cui-areatype="menu-panel"]) {

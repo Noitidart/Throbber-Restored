@@ -12,10 +12,6 @@
 	toolbar[id="nav-bar"] * #navigator-throbber[cui-areatype="toolbar"] > image {
 		padding: 3px !important;
 	}
-	
-	toolbar[id="nav-bar"] * hbox  {
-		padding: 3px !important;
-	}
 
 	toolbar[id="TabsToolbar"] > #navigator-throbber[cui-areatype="toolbar"] {
 		padding: 3px !important;

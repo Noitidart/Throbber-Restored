@@ -47,7 +47,7 @@ function winWorker(aDOMWindow) {
 		console.warn('this window does not have tabContainer, but just an exception/warning NOT an error');
 	}
 	
-	this.handleEvent = function(e) {
+	/* this.handleEvent = function(e) {
 		switch(e.type) {
 			case 'TabSelect':
 				console.log('tab seld yaaa ' + new Date().getTime());
@@ -64,14 +64,28 @@ function winWorker(aDOMWindow) {
 			default:
 				console.error('e.type not recognized in hanldeEvent', 'e.type = ', e.type);
 		}
+	} */
+	
+	this.onTabSelect = function(e) {
+			console.log('tab seld yaaa ' + new Date().getTime());
+				var tab = e.target;
+				//var browser = tab.linkedBrowser;
+				var throbber = tab.ownerDocument.getAnonymousElementByAttribute(tab, 'class', 'tab-throbber')
+				if (throbber.hasAttribute('busy')) {
+					this.gThrobber.setAttribute('loading', 'true');
+				} else {
+					this.gThrobber.removeAttribute('loading');
+				}
 	}
 	
+	this.onTabSelectBinded = this.onTabSelect.bind(this);
+	
 	this.init = function() {
-		this.gBrowser.tabContainer.addEventListener('TabSelect', this, false);
+		this.gBrowser.tabContainer.addEventListener('TabSelect', this.onTabSelectBinded, false);
 	}
 	
 	this.destroy = function() {
-		this.gBrowser.tabContainer.removeEventListener('TabSelect', this, false);
+		this.gBrowser.tabContainer.removeEventListener('TabSelect', this.onTabSelectBinded, false);
 	}
 }
 

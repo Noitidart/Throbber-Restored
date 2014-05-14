@@ -30,7 +30,7 @@ function winWorker(aDOMWindow) {
 		for(let m of ms) {
 			if(m.attributeName == 'busy') {
 				console.log('m.attributeName = ', m.attributeName, 'm.oldValue = ', m.oldValue);
-				if (m.oldValue == 'true') {
+				if (m.oldValue == 'true') { //if m.oldValue == null then it did not exist before
 					this.gThrobber.removeAttribute('loading');
 				} else {
 					this.gThrobber.setAttribute('loading', 'true');
@@ -73,6 +73,7 @@ function winWorker(aDOMWindow) {
 		var tab = this.gBrowser.selectedTab;
 		var throbber = tab.ownerDocument.getAnonymousElementByAttribute(tab, 'class', 'tab-throbber')
 		this.gMutationObserver.observe(throbber, gMutationConfig);
+		
 	};
 	
 	this.destroy = function() {
@@ -157,15 +158,16 @@ var windowListener = {
 };
 /*end - windowlistener*/
 function startup(aData, aReason) {
-	console.log('0');
+	
 	self.aData = aData; //must go first, because functions in loadIntoWindow use self.aData
-	CustomizableUI.createWidget(
-		  { id : 'navigator-throbber',
-			defaultArea : CustomizableUI.AREA_NAVBAR,
-			tooltiptext: 'navigator-throbber',
-			label : 'navigator-throbber'
-		  });
-	console.log('1');
+	
+	CustomizableUI.createWidget({ //must run createWidget before windowListener.register because the register function needs the button added first
+		id : 'navigator-throbber',
+		defaultArea : CustomizableUI.AREA_NAVBAR,
+		label : 'Activity Indicator',
+		overflows: false
+	});
+	
 	var newURIParam = {
 		aURL: self.path.chrome + 'toolbarbutton.css',
 		aOriginCharset: null,

@@ -20,9 +20,10 @@
 	toolbar:not([id="TabsToolbar"]) > #navigator-throbber {
 		margin: 0px 6px 0px 6px !important;
 	}
-
-	/*start - support for classic theme restorer addon*/
+	
+  	/*start - support for classic theme restorer addon*/
 	toolbar[id="ctr_addon-bar"] > #navigator-throbber {
+	toolbar[id="ctraddon_addon-bar"] > #navigator-throbber {
 		margin: 1px 3px 0px 3px !important;
 	}
 	/*end - support for classic theme restorer addon*/

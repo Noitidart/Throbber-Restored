@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<setting pref="extensions.ThrobberRestored.customImgIdle" title="Custom Idle Image" type="file">
+		Image to show while idle
+	</setting>
+	<setting pref="extensions.ThrobberRestored.customImgLoading" title="Custom Loading Image" type="file">
+		Image to show while loading
+	</setting>
+</vbox>

@@ -34,7 +34,7 @@ function winWorker(aDOMWindow) {
 	this.gMutationFunc = function(ms) {
 		for(let m of ms) {
 			if(m.attributeName == 'busy') {
-				//console.log('m.attributeName = ', m.attributeName, 'm.oldValue = ', m.oldValue);
+				console.log('m.attributeName = ', m.attributeName, 'm.oldValue = ', m.oldValue);
 				if (m.oldValue == 'true') { //if m.oldValue == null then it did not exist before
 					this.gThrobber.removeAttribute('loading');
 				} else {
@@ -48,17 +48,17 @@ function winWorker(aDOMWindow) {
 	this.gMutationObserver = new this.DOMWindow.MutationObserver(this.gMutationFunc.bind(this));
 	
 	if (!this.gBrowser) {
-		//console.error('this window does not have gBrowser');
+		console.error('this window does not have gBrowser');
 	}
 	if (!this.gThrobber) {
-		//console.error('this window does not have gThrobber');
+		console.error('this window does not have gThrobber');
 	}
 	if (!this.gBrowser.tabContainer) {
-		//console.warn('this window does not have tabContainer, but just an exception/warning NOT an error');
+		console.warn('this window does not have tabContainer, but just an exception/warning NOT an error');
 	}
 	
 	this.onTabSelect = function(e) {
-		//console.log('tab seld yaaa ' + new Date().getTime());
+		console.log('tab seld yaaa ' + new Date().getTime());
 		this.gMutationObserver.disconnect();
 		var tab = e.target;
 		//var throbber = tab.ownerDocument.getAnonymousElementByAttribute(tab, 'class', 'tab-throbber')
@@ -203,9 +203,9 @@ var windowListener = {
 			try {
 				worker.destroy();
 			} catch(ex) {
-				//console.warn('exception while destroying worker i = ',  i, 'ex = ', ex);
+				console.warn('exception while destroying worker i = ',  i, 'ex = ', ex);
 			}
-			//console.log('done destorying worker i = ',  i);
+			console.log('done destorying worker i = ',  i);
 		});
 	},
 	//END - DO NOT EDIT HERE
@@ -261,30 +261,10 @@ function startup(aData, aReason) {
 	}
 	
 	CustomizableUI.createWidget({ //must run createWidget before windowListener.register because the register function needs the button added first
-		id: 'navigator-throbber',
-		type: 'custom',
-		defaultArea: CustomizableUI.AREA_NAVBAR,
-		onBuild: function(aDocument) {
-			var toolbaritem = aDocument.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'toolbaritem');
-			var image = aDocument.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'image');
-			
-			var props = {
-				id: 'navigator-throbber',
-				title: 'Activity Indicator',
-				align: 'center',
-				pack: 'center',
-				mousethrough: 'always',
-				removable: 'true',
-				sdkstylewidget: 'true',
-				overflows: false
-			};
-			for (var p in props) {
-				toolbaritem.setAttribute(p, props[p]);
-			}
-			
-			toolbaritem.appendChild(image);
-			return toolbaritem;
-		}
+		id : 'navigator-throbber',
+		defaultArea : CustomizableUI.AREA_NAVBAR,
+		label : 'Loading',
+		overflows: false
 	});
 	
 	var newURIParam = {
@@ -293,13 +273,13 @@ function startup(aData, aReason) {
 		aBaseURI: null
 	}
 	cssUri = Services.io.newURI(newURIParam.aURL, newURIParam.aOriginCharset, newURIParam.aBaseURI);
-	//console.log('aURL=', self.path.chrome + 'toolbarbutton.css');
-	//console.log('cssUri=', cssUri);
+	console.log('aURL=', self.path.chrome + 'toolbarbutton.css');
+	console.log('cssUri=', cssUri);
 	
 	windowListener.register();
 	
 	myServices.sss.loadAndRegisterSheet(cssUri, myServices.sss.USER_SHEET); //running this last as i think its syncronus
-	//console.log('here');
+	console.log('here');
 }
 
 function shutdown(aData, aReason) {

@@ -28,7 +28,7 @@ function winWorker(aDOMWindow) {
 	this.DOMWindow = aDOMWindow;
 	this.DOMDocument = this.DOMWindow.document;
 	this.gBrowser = this.DOMWindow.gBrowser;
-	this.gThrobber = this.DOMDocument.getElementById('navigator-throbber');
+	this.gThrobber = this.DOMDocument.getElementById('throbber-restored');
 	
 	
 	this.gMutationFunc = function(ms) {
@@ -127,7 +127,7 @@ var observers = {
 					browseBtn.parentNode.insertBefore(el, browseBtn);
 					//start the oninput changed method
 					var setattr = '';
-					setattr += 'alert(\'starting ' + n + '\');';
+					//setattr += 'alert(\'starting ' + n + '\');';
 					setattr += 'var resetBtn = document.getAnonymousElementByAttribute(this, \'anonid\', \'resetbtn\');';
 					setattr += 'var img = document.getAnonymousElementByAttribute(this, \'anonid\', \'preview\');';
 					setattr += 'if (this.value != "") {'
@@ -139,7 +139,7 @@ var observers = {
 					setattr += 'resetBtn.style.display = \'none\';';
 					setattr += 'img.src = \'\';';
 					setattr += '}';
-					setattr += 'alert(\'done\');';
+					//setattr += 'alert(\'done\');';
 					custImgSettings[n].setAttribute('oninputchanged', setattr);
 					//end the oninput changed method
 					
@@ -251,7 +251,7 @@ var windowListener = {
 			return;
 		}
 		
-		/* var throbber = aDOMWindow.document.getElementById('navigator-throbber');
+		/* var throbber = aDOMWindow.document.getElementById('throbber-restored');
 		if (throbber) {
 			
 		} */
@@ -298,7 +298,7 @@ function startup(aData, aReason) {
 	}
 	
 	CustomizableUI.createWidget({ //must run createWidget before windowListener.register because the register function needs the button added first
-		id: 'navigator-throbber',
+		id: 'throbber-restored',
 		type: 'custom',
 		defaultArea: CustomizableUI.AREA_NAVBAR,
 		onBuild: function(aDocument) {
@@ -306,7 +306,7 @@ function startup(aData, aReason) {
 			var image = aDocument.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'image');
 			
 			var props = {
-				id: 'navigator-throbber',
+				id: 'throbber-restored',
 				title: 'Activity Indicator',
 				align: 'center',
 				pack: 'center',
@@ -345,7 +345,7 @@ function shutdown(aData, aReason) {
 	console.log('s0');
 	windowListener.unregister();
 	console.log('s1');
-	CustomizableUI.destroyWidget('navigator-throbber');
+	CustomizableUI.destroyWidget('throbber-restored');
 	console.log('s2');
 	myServices.sss.unregisterSheet(cssUri, myServices.sss.USER_SHEET); //running htis last as i think its syncronus
 	console.log('s3');
@@ -394,11 +394,11 @@ function uninstall(aData, aReason) {
 			console.log('profRootDirLoc', profRootDirLoc)
 			promiseDelete.then(
 				function() {
-					Services.prompt.alert(null, 'deleted', 'success on ' + n);
+					//Services.prompt.alert(null, 'deleted', 'success on ' + n);
 				},
 				function(aRejReas) {
 					console.warn('Failed to delete copy of custom throbber ' + n + ' image for reason: ', aRejReas);
-					Services.prompt.alert(null, 'deleted', 'FAILED on ' + n);
+					//Services.prompt.alert(null, 'deleted', 'FAILED on ' + n);
 				}
 			);
 		});
@@ -424,10 +424,10 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 			} else if (oldVal != newVal) {
 				msga = 'really chaning';
 			}
-			Services.prompt.alert(null, 'prefChange - ' + refObj.name, msga);
+			//Services.prompt.alert(null, 'prefChange - ' + refObj.name, msga);
 			if (oldVal && oldVal != '') {
 				myServices.sss.unregisterSheet(cssUri_CustomImgIdle, myServices.sss.USER_SHEET);
-				Services.prompt.alert(null, 'sheet unreg', 'old sheet unrgistered');
+				//Services.prompt.alert(null, 'sheet unreg', 'old sheet unrgistered');
 			}
 			newVal = newVal.trim();
 			if (newVal == '') {
@@ -440,11 +440,11 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 					var promiseDelete = OS.File.remove(profRootDirLoc);
 					promiseDelete.then(
 						function() {
-							Services.prompt.alert(null, 'deleted', 'success');
+							//Services.prompt.alert(null, 'deleted', 'success');
 						},
 						function(aRejReas) {
 							console.warn('Failed to delete copy of custom throbber IDLE image for reason: ', aRejReas);
-							Services.prompt.alert(null, 'deleted', 'FAILED');
+							//Services.prompt.alert(null, 'deleted', 'FAILED');
 						}
 					);
 				}
@@ -460,7 +460,7 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 					//var newuri = Services.io.newURI(newVal, null, null);
 					//var newValRep = 'file:///' + newuri.spec.replace(/\\/g, '/');
 					
-					var css = '#navigator-throbber:not([loading]) { list-style-image: url("' + fileuri + '#' + Math.random() + '") !important; }';
+					var css = '#throbber-restored:not([loading]) { list-style-image: url("' + fileuri + '#' + Math.random() + '") !important; }';
 					var newURIParam = {
 						aURL: 'data:text/css,' + encodeURIComponent(css),
 						aOriginCharset: null,
@@ -503,10 +503,10 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 			} else if (oldVal != newVal) {
 				msga = 'really chaning';
 			}
-			Services.prompt.alert(null, 'prefChange - ' + refObj.name, msga);
+			//Services.prompt.alert(null, 'prefChange - ' + refObj.name, msga);
 			if (oldVal && oldVal != '') {
 				myServices.sss.unregisterSheet(cssUri_CustomImgLoading, myServices.sss.USER_SHEET);
-				Services.prompt.alert(null, 'sheet unreg', 'old sheet unrgistered');
+				//Services.prompt.alert(null, 'sheet unreg', 'old sheet unrgistered');
 			}
 			newVal = newVal.trim();
 			if (newVal == '') {
@@ -519,11 +519,11 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 					var promiseDelete = OS.File.remove(profRootDirLoc);
 					promiseDelete.then(
 						function() {
-							Services.prompt.alert(null, 'deleted', 'success');
+							//Services.prompt.alert(null, 'deleted', 'success');
 						},
 						function(aRejReas) {
 							console.warn('Failed to delete copy of custom throbber LOADING image for reason: ', aRejReas);
-							Services.prompt.alert(null, 'deleted', 'FAILED');
+							//Services.prompt.alert(null, 'deleted', 'FAILED');
 						}
 					);
 				}
@@ -539,7 +539,7 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 					//var newuri = Services.io.newURI(newVal, null, null);
 					//var newValRep = 'file:///' + newuri.spec.replace(/\\/g, '/');
 					
-					var css = '#navigator-throbber[loading] { list-style-image: url("' + fileuri + '#' + Math.random() + '") !important; }';
+					var css = '#throbber-restored[loading] { list-style-image: url("' + fileuri + '#' + Math.random() + '") !important; }';
 					var newURIParam = {
 						aURL: 'data:text/css,' + encodeURIComponent(css),
 						aOriginCharset: null,

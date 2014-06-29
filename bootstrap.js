@@ -150,7 +150,7 @@ var observers = {
 					var el = doc.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'image');
 					var props = {
 						id: 'imgPreview_' + n,
-						onclick: 'alert(\'Path of Image: "\' + this.getAttribute(\'value\') + \'"\')',
+						onclick: 'alert(\'Original Path of Image on Disk: "\' + this.getAttribute(\'value\') + \'"\')',
 						anonid: 'preview',
 						src: '',
 						value: ''
@@ -160,7 +160,10 @@ var observers = {
 						preExEl.parentNode.removeChild(preExEl);
 					}
 					if (prefs[n].value != '') {
-						props.src = Services.io.newFileURI(new FileUtils.File(prefs[n].value)).spec;
+						var normalized = OS.Path.normalize(prefs[n].value);
+						//var profRootDirLoc = OS.Path.join(OS.Constants.Path.profileDir, OS.Path.basename(normalized));
+						var profRootDirLoc = OS.Path.join(OS.Constants.Path.profileDir, 'throbber-restored-' + n);
+						props.src = Services.io.newFileURI(new FileUtils.File(profRootDirLoc)).spec;
 						props.value = prefs[n].value;
 					}
 					for (var p in props) {
@@ -377,6 +380,29 @@ function install(aData, aReason) {}
 function uninstall(aData, aReason) {
 	if (aReason == ADDON_UNINSTALL) { //have to put this here because uninstall fires on upgrade/downgrade too
 		//this is real uninstall
+		Cu.import('resource://gre/modules/Services.jsm');
+		Cu.import('resource://gre/modules/devtools/Console.jsm');
+		Cu.import('resource://gre/modules/osfile.jsm');
+		//if custom images were used lets delete them now
+		var customImgPrefs = ['customImgIdle', 'customImgLoading'];
+		[].forEach.call(customImgPrefs, function(n) {
+			//cant check the pref i guess because its probably unintialized or deleted before i used have a `if(prefs[n].value != '') {`
+			//var normalized = OS.Path.normalize(prefs[n].value);
+			//var profRootDirLoc = OS.Path.join(OS.Constants.Path.profileDir, OS.Path.basename(normalized));
+			var profRootDirLoc = OS.Path.join(OS.Constants.Path.profileDir, 'throbber-restored-' + n);
+			var promiseDelete = OS.File.remove(profRootDirLoc);
+			console.log('profRootDirLoc', profRootDirLoc)
+			promiseDelete.then(
+				function() {
+					Services.prompt.alert(null, 'deleted', 'success on ' + n);
+				},
+				function(aRejReas) {
+					console.warn('Failed to delete copy of custom throbber ' + n + ' image for reason: ', aRejReas);
+					Services.prompt.alert(null, 'deleted', 'FAILED on ' + n);
+				}
+			);
+		});
+		
 		Services.prefs.deleteBranch(prefPrefix);
 	}
 }
@@ -390,29 +416,77 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 		value: null,
 		type: 'Char',
 		onChange: function(oldVal, newVal, refObj) {
-			Services.prompt.alert(null, "pref change", "pref change function triggering on - " + refObj.name);
+			var msga = '';
+			if (oldVal === null) {
+				msga = 'register/init';
+			} else if (oldVal == newVal) {
+				msga = 'probably a programmatic force';
+			} else if (oldVal != newVal) {
+				msga = 'really chaning';
+			}
+			Services.prompt.alert(null, 'prefChange - ' + refObj.name, msga);
 			if (oldVal && oldVal != '') {
 				myServices.sss.unregisterSheet(cssUri_CustomImgIdle, myServices.sss.USER_SHEET);
+				Services.prompt.alert(null, 'sheet unreg', 'old sheet unrgistered');
 			}
 			newVal = newVal.trim();
 			if (newVal == '') {
 				cssUri_CustomImgIdle = '';
+				if (oldVal !== null && oldVal != '') {
+					//lets delete the old one from profile folder
+					var normalized = OS.Path.normalize(oldVal);
+					//var profRootDirLoc = OS.Path.join(OS.Constants.Path.profileDir, OS.Path.basename(normalized));
+					var profRootDirLoc = OS.Path.join(OS.Constants.Path.profileDir, 'throbber-restored-customImgIdle');
+					var promiseDelete = OS.File.remove(profRootDirLoc);
+					promiseDelete.then(
+						function() {
+							Services.prompt.alert(null, 'deleted', 'success');
+						},
+						function(aRejReas) {
+							console.warn('Failed to delete copy of custom throbber IDLE image for reason: ', aRejReas);
+							Services.prompt.alert(null, 'deleted', 'FAILED');
+						}
+					);
+				}
 			} else {
 				var normalized = OS.Path.normalize(newVal);
-				var file = new FileUtils.File(normalized);
-				var fileuri = Services.io.newFileURI(file).spec;
-				console.log('fileuri', fileuri);
-				//var newuri = Services.io.newURI(newVal, null, null);
-				//var newValRep = 'file:///' + newuri.spec.replace(/\\/g, '/');
+				//var profRootDirLoc = OS.Path.join(OS.Constants.Path.profileDir, OS.Path.basename(normalized));
+				var profRootDirLoc = OS.Path.join(OS.Constants.Path.profileDir, 'throbber-restored-customImgIdle');
 				
- 				var css = '#navigator-throbber:not([loading]) { list-style-image: url("' + fileuri + '") !important; }';
-				var newURIParam = {
-					aURL: 'data:text/css,' + encodeURIComponent(css),
-					aOriginCharset: null,
-					aBaseURI: null
-				};
-				cssUri_CustomImgIdle = Services.io.newURI(newURIParam.aURL, newURIParam.aOriginCharset, newURIParam.aBaseURI);
-				myServices.sss.loadAndRegisterSheet(cssUri_CustomImgIdle, myServices.sss.USER_SHEET); //running this last as i think its syncronus
+				var applyIt = function() {
+					var file = new FileUtils.File(profRootDirLoc);
+					var fileuri = Services.io.newFileURI(file).spec;
+					console.log('fileuri', fileuri);
+					//var newuri = Services.io.newURI(newVal, null, null);
+					//var newValRep = 'file:///' + newuri.spec.replace(/\\/g, '/');
+					
+					var css = '#navigator-throbber:not([loading]) { list-style-image: url("' + fileuri + '#' + Math.random() + '") !important; }';
+					var newURIParam = {
+						aURL: 'data:text/css,' + encodeURIComponent(css),
+						aOriginCharset: null,
+						aBaseURI: null
+					};
+					cssUri_CustomImgIdle = Services.io.newURI(newURIParam.aURL, newURIParam.aOriginCharset, newURIParam.aBaseURI);
+					myServices.sss.loadAndRegisterSheet(cssUri_CustomImgIdle, myServices.sss.USER_SHEET); //running this last as i think its syncronus
+				}
+				
+				if (oldVal !== null) {
+					//lets copy it to profile folder
+					var promiseCopy = OS.File.copy(normalized, profRootDirLoc);
+					promiseCopy.then(
+						function() {
+							console.log('copy completed succesfully');
+							applyIt();
+						},
+						function() {
+							console.error('copy failed');
+							throw new Error('FAILED TO COPY IMAGE TO PROFILE ROOT DIRECTORY');
+						}
+					);
+				} else {
+					console.log('just going to directly apply it');
+					applyIt();
+				}
 			}
 		}
 	},
@@ -421,30 +495,77 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 		value: null,
 		type: 'Char',
 		onChange: function(oldVal, newVal, refObj) {
-			Services.prompt.alert(null, "pref change", "pref change function triggering on - " + refObj.name);
+			var msga = '';
+			if (oldVal === null) {
+				msga = 'register/init';
+			} else if (oldVal == newVal) {
+				msga = 'probably a programmatic force';
+			} else if (oldVal != newVal) {
+				msga = 'really chaning';
+			}
+			Services.prompt.alert(null, 'prefChange - ' + refObj.name, msga);
 			if (oldVal && oldVal != '') {
 				myServices.sss.unregisterSheet(cssUri_CustomImgLoading, myServices.sss.USER_SHEET);
+				Services.prompt.alert(null, 'sheet unreg', 'old sheet unrgistered');
 			}
 			newVal = newVal.trim();
 			if (newVal == '') {
 				cssUri_CustomImgLoading = '';
+				if (oldVal !== null && oldVal != '') {
+					//lets delete the old one from profile folder
+					var normalized = OS.Path.normalize(oldVal);
+					//var profRootDirLoc = OS.Path.join(OS.Constants.Path.profileDir, OS.Path.basename(normalized));
+					var profRootDirLoc = OS.Path.join(OS.Constants.Path.profileDir, 'throbber-restored-customImgLoading');
+					var promiseDelete = OS.File.remove(profRootDirLoc);
+					promiseDelete.then(
+						function() {
+							Services.prompt.alert(null, 'deleted', 'success');
+						},
+						function(aRejReas) {
+							console.warn('Failed to delete copy of custom throbber LOADING image for reason: ', aRejReas);
+							Services.prompt.alert(null, 'deleted', 'FAILED');
+						}
+					);
+				}
 			} else {
 				var normalized = OS.Path.normalize(newVal);
-				var file = new FileUtils.File(normalized);
-				var fileuri = Services.io.newFileURI(file).spec;
-				console.log('fileuri', fileuri);
+				//var profRootDirLoc = OS.Path.join(OS.Constants.Path.profileDir, OS.Path.basename(normalized));
+				var profRootDirLoc = OS.Path.join(OS.Constants.Path.profileDir, 'throbber-restored-customImgLoading');
 				
-				//var newuri = Services.io.newURI(newVal, null, null);
-				//var newValRep = 'file:///' + newuri.spec.replace(/\\/g, '/');
+				var applyIt = function() {
+					var file = new FileUtils.File(profRootDirLoc);
+					var fileuri = Services.io.newFileURI(file).spec;
+					console.log('fileuri', fileuri);
+					//var newuri = Services.io.newURI(newVal, null, null);
+					//var newValRep = 'file:///' + newuri.spec.replace(/\\/g, '/');
+					
+					var css = '#navigator-throbber[loading] { list-style-image: url("' + fileuri + '#' + Math.random() + '") !important; }';
+					var newURIParam = {
+						aURL: 'data:text/css,' + encodeURIComponent(css),
+						aOriginCharset: null,
+						aBaseURI: null
+					};
+					cssUri_CustomImgLoading = Services.io.newURI(newURIParam.aURL, newURIParam.aOriginCharset, newURIParam.aBaseURI);
+					myServices.sss.loadAndRegisterSheet(cssUri_CustomImgLoading, myServices.sss.USER_SHEET); //running this last as i think its syncronus
+				}
 				
- 				var css = '#navigator-throbber[loading] { list-style-image: url("' + fileuri + '") !important; }';
-				var newURIParam = {
-					aURL: 'data:text/css,' + encodeURIComponent(css),
-					aOriginCharset: null,
-					aBaseURI: null
-				};
-				cssUri_CustomImgLoading = Services.io.newURI(newURIParam.aURL, newURIParam.aOriginCharset, newURIParam.aBaseURI);
-				myServices.sss.loadAndRegisterSheet(cssUri_CustomImgLoading, myServices.sss.USER_SHEET); //running this last as i think its syncronus
+				if (oldVal !== null) {
+					//lets copy it to profile folder
+					var promiseCopy = OS.File.copy(normalized, profRootDirLoc);
+					promiseCopy.then(
+						function() {
+							console.log('copy completed succesfully');
+							applyIt();
+						},
+						function() {
+							console.error('copy failed');
+							throw new Error('FAILED TO COPY IMAGE TO PROFILE ROOT DIRECTORY');
+						}
+					);
+				} else {
+					console.log('just going to directly apply it');
+					applyIt();
+				}
 			}
 		}
 	}

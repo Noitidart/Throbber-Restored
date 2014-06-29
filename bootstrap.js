@@ -134,7 +134,7 @@ var observers = {
 					setattr += 'resetBtn.style.display = \'\';';
 					setattr += 'resetBtn.style.display = \'\';';
 					setattr += 'img.src = Services.io.newFileURI(new FileUtils.File(this.value)).spec;';
-					setattr += 'img.value = this.value;';
+					setattr += 'img.setAttribute(\'value\', this.value);';
 					setattr += '} else {';
 					setattr += 'resetBtn.style.display = \'none\';';
 					setattr += 'img.src = \'\';';
@@ -150,8 +150,10 @@ var observers = {
 					var el = doc.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'image');
 					var props = {
 						id: 'imgPreview_' + n,
-						onclick: 'alert(\'Path of Image: "\' + this.value + \'"\')',
-						anonid: 'preview'
+						onclick: 'alert(\'Path of Image: "\' + this.getAttribute(\'value\') + \'"\')',
+						anonid: 'preview',
+						src: '',
+						value: ''
 					};
 					var preExEl = doc.querySelector('#' + props.id);
 					if (preExEl) { //so remove it then we'll add again (just in case this is an update or something and something changed)
@@ -159,6 +161,7 @@ var observers = {
 					}
 					if (prefs[n].value != '') {
 						props.src = Services.io.newFileURI(new FileUtils.File(prefs[n].value)).spec;
+						props.value = prefs[n].value;
 					}
 					for (var p in props) {
 						el.setAttribute(p, props[p]);
@@ -387,6 +390,7 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 		value: null,
 		type: 'Char',
 		onChange: function(oldVal, newVal, refObj) {
+			Services.prompt.alert(null, "pref change", "pref change function triggering on - " + refObj.name);
 			if (oldVal && oldVal != '') {
 				myServices.sss.unregisterSheet(cssUri_CustomImgIdle, myServices.sss.USER_SHEET);
 			}
@@ -417,6 +421,7 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 		value: null,
 		type: 'Char',
 		onChange: function(oldVal, newVal, refObj) {
+			Services.prompt.alert(null, "pref change", "pref change function triggering on - " + refObj.name);
 			if (oldVal && oldVal != '') {
 				myServices.sss.unregisterSheet(cssUri_CustomImgLoading, myServices.sss.USER_SHEET);
 			}

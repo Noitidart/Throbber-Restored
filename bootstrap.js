@@ -96,77 +96,78 @@ var observers = {
 			if (aData == self.aData.id) {
 				console.log('IS THROBBER RESTORED');
 				var doc = aSubject;
+				
+				/*start - set up xul on custom images settings*/
 				var custImgIdle = doc.querySelector('setting[pref="extensions.ThrobberRestored.customImgIdle"]');
 				var custImgLoading = doc.querySelector('setting[pref="extensions.ThrobberRestored.customImgLoading"]');
+				var custImgSettings = {customImgIdle: custImgIdle, customImgLoading: custImgLoading}; //key = pref name in prefs object value is the setting xul element
 				
-				var props = {
-					id: 'btn_resetCustImgIdle',
-					label: 'Restore Default'
-				};
-				if (prefs.customImgIdle.value == '') {
-					props.style = 'display:none;'
+				for (var n in custImgSettings) {
+					var props = {
+						id: 'resetBtn_' + n,
+						label: 'Restore Default',
+						anonid: 'resetbtn'
+					};
+					if (prefs[n].value == '') {
+						props.style = 'display:none;'
+					}
+					var preExEl = doc.querySelector('#' + props.id);
+					if (preExEl) { //label is already there so continue, so remove it then we'll add again
+						preExEl.parentNode.removeChild(preExEl);
+					}
+					var el = doc.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'button');
+					el.addEventListener('command', function(settingPrefName, settingXUL) {
+						prefs[settingPrefName].setval('');
+						settingXUL.inputChanged();
+					}.bind(null, n, custImgSettings[n]), false);
+					for (var p in props) {
+						el.setAttribute(p, props[p]);
+					}
+					var browseBtn = doc.getAnonymousElementByAttribute(custImgSettings[n], 'anonid', 'button');
+					browseBtn.parentNode.insertBefore(el, browseBtn);
+					//start the oninput changed method
+					var setattr = '';
+					setattr += 'alert(\'starting ' + n + '\');';
+					setattr += 'var resetBtn = document.getAnonymousElementByAttribute(this, \'anonid\', \'resetbtn\');';
+					setattr += 'var img = document.getAnonymousElementByAttribute(this, \'anonid\', \'preview\');';
+					setattr += 'if (this.value != "") {'
+					setattr += 'resetBtn.style.display = \'\';';
+					setattr += 'resetBtn.style.display = \'\';';
+					setattr += 'img.src = Services.io.newFileURI(new FileUtils.File(this.value)).spec;';
+					setattr += 'img.value = this.value;';
+					setattr += '} else {';
+					setattr += 'resetBtn.style.display = \'none\';';
+					setattr += 'img.src = \'\';';
+					setattr += '}';
+					setattr += 'alert(\'done\');';
+					custImgSettings[n].setAttribute('oninputchanged', setattr);
+					//end the oninput changed method
+					
+					//add idle img preview
+					var browseLbl = doc.getAnonymousElementByAttribute(custImgSettings[n], 'anonid', 'input');
+					browseLbl.style.display = 'none';
+					
+					var el = doc.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'image');
+					var props = {
+						id: 'imgPreview_' + n,
+						onclick: 'alert(\'Path of Image: "\' + this.value + \'"\')',
+						anonid: 'preview'
+					};
+					var preExEl = doc.querySelector('#' + props.id);
+					if (preExEl) { //so remove it then we'll add again (just in case this is an update or something and something changed)
+						preExEl.parentNode.removeChild(preExEl);
+					}
+					if (prefs[n].value != '') {
+						props.src = Services.io.newFileURI(new FileUtils.File(prefs[n].value)).spec;
+					}
+					for (var p in props) {
+						el.setAttribute(p, props[p]);
+					}
+					browseLbl.parentNode.insertBefore(el, browseLbl);
+					//end idle img preview
 				}
-				var preExEl = doc.querySelector('#' + props.id);
-				if (preExEl) { //label is already there so continue, so remove it then we'll add again
-					preExEl.parentNode.removeChild(preExEl);
-				}
-				var el = doc.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'button');
-				el.addEventListener('command', function() {
-					prefs.customImgIdle.setval('');
-					custImgIdle.inputChanged();
-				}, false);
-				for (var p in props) {
-					el.setAttribute(p, props[p]);
-				}
-				var browseBtn = doc.getAnonymousElementByAttribute(custImgIdle, 'anonid', 'button');
-				browseBtn.parentNode.insertBefore(el, browseBtn);
-				//start the oninput changed method
-				var setattr = '';
-				setattr += 'alert(\'starting\');';
-				setattr += 'var resetBtn = document.getAnonymousElementByAttribute(this, \'anonid\', \'button\').parentNode.querySelector(\'[label="Restore Default"]\');';
-				setattr += 'if (this.value != "") {'
-				setattr += 'resetBtn.style.display = \'\';';
-				setattr += '} else {';
-				setattr += 'resetBtn.style.display = \'none\';';
-				setattr += '}';
-				setattr += 'alert(\'done\');';
-				custImgIdle.setAttribute('oninputchanged', setattr);
-				//end the oninput changed method
+				/*end - set up xul on custom images settings*/
 				
-				//add loading reste button
-				var props = {
-					id: 'btn_resetCustImgLoading',
-					label: 'Restore Default'
-				};
-				if (prefs.customImgLoading.value == '') {
-					props.style = 'display:none;'
-				}
-				var preExEl = doc.querySelector('#' + props.id);
-				if (preExEl) { //label is already there so continue, so remove it then we'll add again
-					preExEl.parentNode.removeChild(preExEl);
-				}
-				var el = doc.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'button');
-				el.addEventListener('command', function() {
-					prefs.customImgLoading.setval('');
-					custImgLoading.inputChanged();
-				}, false);
-				for (var p in props) {
-					el.setAttribute(p, props[p]);
-				}
-				var browseBtn = doc.getAnonymousElementByAttribute(custImgLoading, 'anonid', 'button');
-				browseBtn.parentNode.insertBefore(el, browseBtn);
-				//start the oninput changed method
-				var setattr = '';
-				setattr += 'alert(\'starting\');';
-				setattr += 'var resetBtn = document.getAnonymousElementByAttribute(this, \'anonid\', \'button\').parentNode.querySelector(\'[label="Restore Default"]\');';
-				setattr += 'if (this.value != "") {'
-				setattr += 'resetBtn.style.display = \'\';';
-				setattr += '} else {';
-				setattr += 'resetBtn.style.display = \'none\';';
-				setattr += '}';
-				setattr += 'alert(\'done\');';
-				custImgLoading.setAttribute('oninputchanged', setattr);
-				//end the oninput changed method
 			}
 		},
 		reg: function () {

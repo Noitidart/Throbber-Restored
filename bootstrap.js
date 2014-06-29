@@ -116,10 +116,15 @@ var observers = {
 						preExEl.parentNode.removeChild(preExEl);
 					}
 					var el = doc.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'button');
-					el.addEventListener('command', function(settingPrefName, settingXUL) {
+					
+					console.log('starting bind');
+					var bound = function(settingPrefName, settingXUL) {
+						console.log('calling the bound func');
 						prefs[settingPrefName].setval('');
 						settingXUL.inputChanged();
-					}.bind(null, n, custImgSettings[n]), false);
+					}.bind(null, n, custImgSettings[n]);
+					console.log('adding event listener to ' + n);
+					el.addEventListener('command', bound, false);
 					for (var p in props) {
 						el.setAttribute(p, props[p]);
 					}
@@ -380,13 +385,10 @@ function install(aData, aReason) {}
 function uninstall(aData, aReason) {
 	if (aReason == ADDON_UNINSTALL) { //have to put this here because uninstall fires on upgrade/downgrade too
 		//this is real uninstall
-		Cu.import('resource://gre/modules/Services.jsm');
-		Cu.import('resource://gre/modules/devtools/Console.jsm');
-		Cu.import('resource://gre/modules/osfile.jsm');
 		//if custom images were used lets delete them now
 		var customImgPrefs = ['customImgIdle', 'customImgLoading'];
 		[].forEach.call(customImgPrefs, function(n) {
-			//cant check the pref i guess because its probably unintialized or deleted before i used have a `if(prefs[n].value != '') {`
+			//cant check the pref i guess because it may be unintialized or deleted before i used have a `if(prefs[n].value != '') {`
 			//var normalized = OS.Path.normalize(prefs[n].value);
 			//var profRootDirLoc = OS.Path.join(OS.Constants.Path.profileDir, OS.Path.basename(normalized));
 			var profRootDirLoc = OS.Path.join(OS.Constants.Path.profileDir, 'throbber-restored-' + n);
@@ -478,8 +480,8 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 							console.log('copy completed succesfully');
 							applyIt();
 						},
-						function() {
-							console.error('copy failed');
+						function(aRejReas) {
+							console.error('copy failed reason: ', aRejReas);
 							throw new Error('FAILED TO COPY IMAGE TO PROFILE ROOT DIRECTORY');
 						}
 					);
@@ -505,6 +507,7 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 			}
 			//Services.prompt.alert(null, 'prefChange - ' + refObj.name, msga);
 			if (oldVal && oldVal != '') {
+				console.log('cssUri_CustomImgLoading', cssUri_CustomImgLoading);
 				myServices.sss.unregisterSheet(cssUri_CustomImgLoading, myServices.sss.USER_SHEET);
 				//Services.prompt.alert(null, 'sheet unreg', 'old sheet unrgistered');
 			}
@@ -557,8 +560,8 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 							console.log('copy completed succesfully');
 							applyIt();
 						},
-						function() {
-							console.error('copy failed');
+						function(aRejReas) {
+							console.error('copy failed reason: ', aRejReas);
 							throw new Error('FAILED TO COPY IMAGE TO PROFILE ROOT DIRECTORY');
 						}
 					);

@@ -6,13 +6,4 @@
 	<setting pref="extensions.ThrobberRestored.customImgLoading" title="Custom Loading Image" type="file">
 		Image to show while loading
 	</setting>
-	<setting pref="extensions.ThrobberRestored.showTxtOnToolbar" title="Show Text on Toolbar Button" type="bool">
-		If labels on other toolbar buttons are visible (like by using add-on "Classic Theme Restorer") then show label on throbber toolbar button
-	</setting>
-	<setting pref="extensions.ThrobberRestored.customTxtLoading" title="Loading Text" type="string">
-		Text to show on toolbarbutton while loading
-	</setting>
-	<setting pref="extensions.ThrobberRestored.customTxtIdle" title="Idle Text" type="string">
-		Text to show on toolbarbutton while idle
-	</setting>
 </vbox>

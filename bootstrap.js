@@ -13,7 +13,7 @@ var cssUri_CustomImgLoading;
 
 Cu.import('resource://gre/modules/Services.jsm');
 Cu.import('resource:///modules/CustomizableUI.jsm');
-
+Cu.import('resource://gre/modules/devtools/Console.jsm');
 Cu.import('resource://gre/modules/XPCOMUtils.jsm');
 Cu.import('resource://gre/modules/osfile.jsm');
 Cu.import('resource://gre/modules/FileUtils.jsm');
@@ -34,7 +34,7 @@ function winWorker(aDOMWindow) {
 	this.gMutationFunc = function(ms) {
 		for(let m of ms) {
 			if(m.attributeName == 'busy') {
-
+				//console.log('m.attributeName = ', m.attributeName, 'm.oldValue = ', m.oldValue);
 				if (m.oldValue == 'true') { //if m.oldValue == null then it did not exist before
 					this.gThrobber.removeAttribute('loading');
 				} else {
@@ -48,17 +48,17 @@ function winWorker(aDOMWindow) {
 	this.gMutationObserver = new this.DOMWindow.MutationObserver(this.gMutationFunc.bind(this));
 	
 	if (!this.gBrowser) {
-
+		//console.error('this window does not have gBrowser');
 	}
 	if (!this.gThrobber) {
-
+		//console.error('this window does not have gThrobber');
 	}
 	if (!this.gBrowser.tabContainer) {
-
+		//console.warn('this window does not have tabContainer, but just an exception/warning NOT an error');
 	}
 	
 	this.onTabSelect = function(e) {
-
+		//console.log('tab seld yaaa ' + new Date().getTime());
 		this.gMutationObserver.disconnect();
 		var tab = e.target;
 		//var throbber = tab.ownerDocument.getAnonymousElementByAttribute(tab, 'class', 'tab-throbber')
@@ -92,9 +92,9 @@ function winWorker(aDOMWindow) {
 var observers = {
 	inlineOptsDispd: {
 		observe: function (aSubject, aTopic, aData) {
-
+			console.log('incoming inlineOptsDispd: aSubject = ' + aSubject + ' | aTopic = ' + aTopic + ' | aData = ' + aData);
 			if (aData == self.aData.id) {
-
+				console.log('IS THROBBER RESTORED');
 				var doc = aSubject;
 				
 				/*start - set up xul on custom images settings*/
@@ -117,13 +117,13 @@ var observers = {
 					}
 					var el = doc.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'button');
 					
-
+					console.log('starting bind');
 					var bound = function(settingPrefName, settingXUL) {
-
+						console.log('calling the bound func');
 						prefs[settingPrefName].setval('');
 						settingXUL.inputChanged();
 					}.bind(null, n, custImgSettings[n]);
-
+					console.log('adding event listener to ' + n);
 					el.addEventListener('command', bound, false);
 					for (var p in props) {
 						el.setAttribute(p, props[p]);
@@ -190,9 +190,9 @@ var observers = {
 	},
 	inlineOptsHid: {
 		observe: function (aSubject, aTopic, aData) {
-
+			console.log('incoming inlineOptsHid: aSubject = ' + aSubject + ' | aTopic = ' + aTopic + ' | aData = ' + aData);
 			if (aData == self.aData.id) {
-
+				console.log('IS THROBBER RESTORED');
 				//addonMgrXulWin = null; //trial as of 112713
 			}
 		},
@@ -245,9 +245,9 @@ var windowListener = {
 			try {
 				worker.destroy();
 			} catch(ex) {
-
+				//console.warn('exception while destroying worker i = ',  i, 'ex = ', ex);
 			}
-
+			//console.log('done destorying worker i = ',  i);
 		});
 	},
 	//END - DO NOT EDIT HERE
@@ -285,10 +285,10 @@ function startup(aData, aReason) {
 	self.aData = aData; //must go first, because functions in loadIntoWindow use self.aData
 	
 	//start pref stuff more
-
+	console.log('aReason=', aReason);
 	//must forceCallbacks on startup, as the callbacks will read the inital prefs
 	if ([ADDON_INSTALL,ADDON_UPGRADE,ADDON_DOWNGRADE].indexOf(aReason) > -1) {
-
+		console.log('setting defaults logical if');
 		myPrefListener.register(true, true); //true so it triggers the callback on registration, which sets value to current value //myPrefListener.setDefaults(); //in jetpack they get initialized somehow on install so no need for this	//on startup prefs must be initialized first thing, otherwise there is a chance that an added event listener gets called before settings are initalized
 		//setDefaults safe to run after install too though because it wont change the current pref value if it is changed from the default.
 		//good idea to always call setDefaults before register, especially if true for tirgger as if the prefs are not there the value in we are forcing it to use default value which is fine, but you know what i mean its not how i designed it, use of default is a backup plan for when something happens (like maybe pref removed)
@@ -335,49 +335,49 @@ function startup(aData, aReason) {
 		aBaseURI: null
 	}
 	cssUri = Services.io.newURI(newURIParam.aURL, newURIParam.aOriginCharset, newURIParam.aBaseURI);
-
-
+	//console.log('aURL=', self.path.chrome + 'toolbarbutton.css');
+	//console.log('cssUri=', cssUri);
 	
 	windowListener.register();
 	
 	myServices.sss.loadAndRegisterSheet(cssUri, myServices.sss.USER_SHEET); //running this last as i think its syncronus
-
+	//console.log('here');
 }
 
 function shutdown(aData, aReason) {
 	if (aReason == APP_SHUTDOWN) return;
 	
-
+	console.log('s0');
 	windowListener.unregister();
-
+	console.log('s1');
 	CustomizableUI.destroyWidget('throbber-restored');
-
+	console.log('s2');
 	myServices.sss.unregisterSheet(cssUri, myServices.sss.USER_SHEET); //running htis last as i think its syncronus
-
+	console.log('s3');
 	
 	if (cssUri_CustomImgIdle) {
-
+		console.log('s4');
 		myServices.sss.unregisterSheet(cssUri_CustomImgIdle, myServices.sss.USER_SHEET); //running htis last as i think its syncronus
-
+		console.log('s5');
 	}
 	
 	if (cssUri_CustomImgLoading) {
-
+		console.log('s6');
 		myServices.sss.unregisterSheet(cssUri_CustomImgLoading, myServices.sss.USER_SHEET); //running htis last as i think its syncronus
-
+		console.log('s7');
 	}
 	
-
+	console.log('s8');
 	//unregister all observers
 	for (var o in observers) {
 		observers[o].unreg();
 	}
-
+	console.log('s9');
 	
 	//start pref stuff more
 	myPrefListener.unregister();
 	//end pref stuff more
-
+	console.log('s10');
 }
 
 function install(aData, aReason) {}
@@ -393,13 +393,13 @@ function uninstall(aData, aReason) {
 			//var profRootDirLoc = OS.Path.join(OS.Constants.Path.profileDir, OS.Path.basename(normalized));
 			var profRootDirLoc = OS.Path.join(OS.Constants.Path.profileDir, 'throbber-restored-' + n);
 			var promiseDelete = OS.File.remove(profRootDirLoc);
-
+			console.log('profRootDirLoc', profRootDirLoc)
 			promiseDelete.then(
 				function() {
 					//Services.prompt.alert(null, 'deleted', 'success on ' + n);
 				},
 				function(aRejReas) {
-
+					console.warn('Failed to delete copy of custom throbber ' + n + ' image for reason: ', aRejReas);
 					//Services.prompt.alert(null, 'deleted', 'FAILED on ' + n);
 				}
 			);
@@ -445,7 +445,7 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 							//Services.prompt.alert(null, 'deleted', 'success');
 						},
 						function(aRejReas) {
-
+							console.warn('Failed to delete copy of custom throbber IDLE image for reason: ', aRejReas);
 							//Services.prompt.alert(null, 'deleted', 'FAILED');
 						}
 					);
@@ -458,7 +458,7 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 				var applyIt = function() {
 					var file = new FileUtils.File(profRootDirLoc);
 					var fileuri = Services.io.newFileURI(file).spec;
-
+					console.log('fileuri', fileuri);
 					//var newuri = Services.io.newURI(newVal, null, null);
 					//var newValRep = 'file:///' + newuri.spec.replace(/\\/g, '/');
 					
@@ -477,16 +477,16 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 					var promiseCopy = OS.File.copy(normalized, profRootDirLoc);
 					promiseCopy.then(
 						function() {
-
+							console.log('copy completed succesfully');
 							applyIt();
 						},
 						function(aRejReas) {
-
+							console.error('copy failed reason: ', aRejReas);
 							throw new Error('FAILED TO COPY IMAGE TO PROFILE ROOT DIRECTORY');
 						}
 					);
 				} else {
-
+					console.log('just going to directly apply it');
 					applyIt();
 				}
 			}
@@ -507,7 +507,7 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 			}
 			//Services.prompt.alert(null, 'prefChange - ' + refObj.name, msga);
 			if (oldVal && oldVal != '') {
-
+				console.log('cssUri_CustomImgLoading', cssUri_CustomImgLoading);
 				myServices.sss.unregisterSheet(cssUri_CustomImgLoading, myServices.sss.USER_SHEET);
 				//Services.prompt.alert(null, 'sheet unreg', 'old sheet unrgistered');
 			}
@@ -525,7 +525,7 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 							//Services.prompt.alert(null, 'deleted', 'success');
 						},
 						function(aRejReas) {
-
+							console.warn('Failed to delete copy of custom throbber LOADING image for reason: ', aRejReas);
 							//Services.prompt.alert(null, 'deleted', 'FAILED');
 						}
 					);
@@ -538,7 +538,7 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 				var applyIt = function() {
 					var file = new FileUtils.File(profRootDirLoc);
 					var fileuri = Services.io.newFileURI(file).spec;
-
+					console.log('fileuri', fileuri);
 					//var newuri = Services.io.newURI(newVal, null, null);
 					//var newValRep = 'file:///' + newuri.spec.replace(/\\/g, '/');
 					
@@ -557,16 +557,16 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 					var promiseCopy = OS.File.copy(normalized, profRootDirLoc);
 					promiseCopy.then(
 						function() {
-
+							console.log('copy completed succesfully');
 							applyIt();
 						},
 						function(aRejReas) {
-
+							console.error('copy failed reason: ', aRejReas);
 							throw new Error('FAILED TO COPY IMAGE TO PROFILE ROOT DIRECTORY');
 						}
 					);
 				} else {
-
+					console.log('just going to directly apply it');
 					applyIt();
 				}
 			}
@@ -580,12 +580,12 @@ var prefs = { //each key here must match the exact name the pref is saved in the
  */
 function prefSetval(name) {
 	return function(updateTo) {
-
-
+		console.log('in prefSetval');
+		console.info('this = ', this);
 		if ('json' in this) {
 			//updateTo must be an object
 			if (Object.prototype.toString.call(updateTo) != '[object Object]') {
-
+				console.warn('EXCEPTION: prefs[name] is json but updateTo supplied is not an object');
 				return;
 			}
 			
@@ -618,7 +618,7 @@ function PrefListener(branch_name, callback) {
 }
 
 PrefListener.prototype.observe = function(subject, topic, data) {
-
+	console.log('incomcing PrefListener observe', 'topic=', topic, 'data=', data, 'subject=', subject);
 	if (topic == 'nsPref:changed')
 		this._callback(this._branch, data);
 };
@@ -634,25 +634,25 @@ PrefListener.prototype.register = function(setDefaults, trigger) {
 		prefs[p].setval = new prefSetval(p);
 	}
 	
-
+	console.log('added setval');
 	if (setDefaults) {
 		this.setDefaults();
-
+		console.log('finished set defaults');
 	}
 	
 	//should add observer after setting defaults otherwise it triggers the callbacks
 	this._branch.addObserver('', this, false);
-
+	console.log('added observer');
 	
 	if (trigger) {
-
+		console.log('trigger callbacks');
 		this.forceCallbacks();
-
+		console.log('finished all callbacks');
 	}
 };
 
 PrefListener.prototype.forceCallbacks = function() {
-
+	console.log('forcing pref callbacks');
     let that = this;
     this._branch.getChildList('', {}).
       forEach(function (pref_leaf_name)
@@ -661,14 +661,14 @@ PrefListener.prototype.forceCallbacks = function() {
 
 PrefListener.prototype.setDefaults = function() {
 	//sets defaults on the prefs in prefs obj
-
+	console.log('doing setDefaults');
 	for (var p in prefs) {
-
-
+		console.log('will now set default on ', p);
+		console.log('will set it to "' + prefs[p].default + '"');
 		this._defaultBranch['set' + prefs[p].type + 'Pref'](p, prefs[p].default);
-
+		console.log('fined setting default on ', p);
 	}
-
+	console.log('set defaults done');
 };
 
 PrefListener.prototype.unregister = function() {
@@ -678,10 +678,10 @@ PrefListener.prototype.unregister = function() {
 
 var myPrefListener = new PrefListener(prefPrefix, function (branch, name) {
 	//extensions.myextension[name] was changed
-
+	console.log('callback start for pref: ', name);
 	if (!(name in prefs)) {
-
-
+		console.warn('name is not in prefs so return name = ', name);
+		//added this because apparently some pref named prefPreix + '.sdk.console.logLevel' gets created when testing with builder
 		//ALSO gets here if say upgraded, and in this version this pref is not used (same with downgraded)
 		return;
 	}
@@ -691,11 +691,11 @@ var myPrefListener = new PrefListener(prefPrefix, function (branch, name) {
 	try {
 		var newVal = myPrefListener._branch['get' + prefs[name].type + 'Pref'](name);
 	} catch (ex) {
-
+		console.warn('exception when getting newVal (likely the pref was removed): ' + ex);
 		var newVal = null; //note: if ex thrown then pref was removed (likely probably)
 	}
-
-
+	console.log('oldVal == ', oldVal);
+	console.log('newVal == ', newVal);
 	prefs[name].value = newVal === null ? prefs[name].default : newVal;
 
 	if ('json' in prefs[name]) {
@@ -710,7 +710,7 @@ var myPrefListener = new PrefListener(prefPrefix, function (branch, name) {
 	if (prefs[name].onChange) {
 		prefs[name].onChange(oldVal, prefs[name].value, refObj);
 	}
-
+	console.log('myPrefCallback done');
 });
 ////end pref listener stuff
 //end pref stuff

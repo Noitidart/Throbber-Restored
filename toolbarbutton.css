@@ -1,34 +1,34 @@
 @namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
 
 @-moz-document url("chrome://browser/content/browser.xul") {
-	#navigator-throbber {
+	#throbber-restored {
 		list-style-image: url("chrome://throbber-restored/content/notloading_16.png");
 	}
 
-	#navigator-throbber[loading] {
+	#throbber-restored[loading] {
 		list-style-image: url("chrome://throbber-restored/content/loading_16.png");
 	}
 
-	toolbar[id="nav-bar"] * #navigator-throbber[cui-areatype="toolbar"] > image {
+	toolbar[id="nav-bar"] * #throbber-restored[cui-areatype="toolbar"] > image {
 		padding: 3px !important;
 	}
 
-	toolbar[id="TabsToolbar"] > #navigator-throbber[cui-areatype="toolbar"] {
+	toolbar[id="TabsToolbar"] > #throbber-restored[cui-areatype="toolbar"] {
 		padding: 3px !important;
 	}
 
-	toolbar:not([id="TabsToolbar"]) > #navigator-throbber {
+	toolbar:not([id="TabsToolbar"]) > #throbber-restored {
 		margin: 0px 6px 0px 6px !important;
 	}
 
   	/*start - support for classic theme restorer addon*/
-	toolbar[id="ctr_addon-bar"] > #navigator-throbber,
-	toolbar[id="ctraddon_addon-bar"] > #navigator-throbber {
-		margin: 1px 3px 0px 3px !important;
+	toolbar[id="ctr_addon-bar"] > #throbber-restored,
+	toolbar[id="ctraddon_addon-bar"] > #throbber-restored {
+		margin: 0px 3px 0px 3px !important;
 	}
 	/*end - support for classic theme restorer addon*/
 	
-	#navigator-throbber[cui-areatype="menu-panel"] > image {
+	#throbber-restored[cui-areatype="menu-panel"] > image {
 		width: 32px !important;
 		height: 32px !important;
 	}

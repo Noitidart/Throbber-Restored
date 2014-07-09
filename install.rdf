@@ -21,7 +21,7 @@
 
 		<!-- Front End MetaData -->
 		<em:name>Throbber Restored</em:name>
-		<em:description>Restores the activity indicator, also known as throbber, to Australis.</em:description>
+		<em:description>Restores the activity indicator, also known as throbber, to Australis. Can use default images from FF28 or load your own.</em:description>
 		<em:creator>Noitidart</em:creator>
 		<em:creator>PimpUigi for Idea</em:creator>
 	  </Description>

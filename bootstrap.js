@@ -302,6 +302,12 @@ function startup(aData, aReason) {
 		observers[o].reg();
 	}
 	
+	try {
+		CustomizableUI.removeWidgetFromArea('navigator-throbber'); //have to do this because its the fix for issue #11, its weird how it doesnt affect all people, probably something to do with CTR
+	} catch (ex) {
+		console.info('on remove widge of old id ran into ex:', ex);
+	}
+	
 	CustomizableUI.createWidget({ //must run createWidget before windowListener.register because the register function needs the button added first
 		id: 'throbber-restored',
 		type: 'custom',

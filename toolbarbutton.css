@@ -10,7 +10,7 @@
 	}
 
 	toolbar[id="nav-bar"] * #throbber-restored[cui-areatype="toolbar"] > image {
-		padding: 3px !important;
+		margin: 6px;
 	}
 
 	toolbar[id="TabsToolbar"] > #throbber-restored[cui-areatype="toolbar"] {

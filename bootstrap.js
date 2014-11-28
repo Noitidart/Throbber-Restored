@@ -303,7 +303,7 @@ function startup(aData, aReason) {
 	}
 	
 	try {
-		CustomizableUI.removeWidgetFromArea('navigator-throbber'); //have to do this because its the fix for issue #11, its weird how it doesnt affect all people, probably something to do with CTR
+		//CustomizableUI.removeWidgetFromArea('navigator-throbber'); //have to do this because its the fix for issue #11, its weird how it doesnt affect all people, probably something to do with CTR
 	} catch (ex) {
 		console.info('on remove widge of old id ran into ex:', ex);
 	}

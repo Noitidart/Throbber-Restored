@@ -28,7 +28,7 @@ function winWorker(aDOMWindow) {
 	this.DOMWindow = aDOMWindow;
 	this.DOMDocument = this.DOMWindow.document;
 	this.gBrowser = this.DOMWindow.gBrowser;
-	this.gThrobber = this.DOMDocument.getElementById('throbber-restored');
+	this.gThrobber = this.DOMDocument.getElementById('navigator-throbber');
 	
 	
 	this.gMutationFunc = function(ms) {
@@ -256,7 +256,7 @@ var windowListener = {
 			return;
 		}
 		
-		/* var throbber = aDOMWindow.document.getElementById('throbber-restored');
+		/* var throbber = aDOMWindow.document.getElementById('navigator-throbber');
 		if (throbber) {
 			
 		} */
@@ -309,7 +309,7 @@ function startup(aData, aReason) {
 	}
 	
 	CustomizableUI.createWidget({ //must run createWidget before windowListener.register because the register function needs the button added first
-		id: 'throbber-restored',
+		id: 'navigator-throbber',
 		type: 'custom',
 		defaultArea: CustomizableUI.AREA_NAVBAR,
 		onBuild: function(aDocument) {
@@ -317,7 +317,7 @@ function startup(aData, aReason) {
 			var image = aDocument.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'image');
 			
 			var props = {
-				id: 'throbber-restored',
+				id: 'navigator-throbber',
 				title: 'Activity Indicator',
 				align: 'center',
 				pack: 'center',
@@ -356,7 +356,7 @@ function shutdown(aData, aReason) {
 	console.log('s0');
 	windowListener.unregister();
 	console.log('s1');
-	CustomizableUI.destroyWidget('throbber-restored');
+	CustomizableUI.destroyWidget('navigator-throbber');
 	console.log('s2');
 	myServices.sss.unregisterSheet(cssUri, myServices.sss.USER_SHEET); //running htis last as i think its syncronus
 	console.log('s3');
@@ -468,7 +468,7 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 					//var newuri = Services.io.newURI(newVal, null, null);
 					//var newValRep = 'file:///' + newuri.spec.replace(/\\/g, '/');
 					
-					var css = '#throbber-restored:not([loading]) { list-style-image: url("' + fileuri + '#' + Math.random() + '") !important; }';
+					var css = '#navigator-throbber:not([loading]) { list-style-image: url("' + fileuri + '#' + Math.random() + '") !important; }';
 					var newURIParam = {
 						aURL: 'data:text/css,' + encodeURIComponent(css),
 						aOriginCharset: null,
@@ -548,7 +548,7 @@ var prefs = { //each key here must match the exact name the pref is saved in the
 					//var newuri = Services.io.newURI(newVal, null, null);
 					//var newValRep = 'file:///' + newuri.spec.replace(/\\/g, '/');
 					
-					var css = '#throbber-restored[loading] { list-style-image: url("' + fileuri + '#' + Math.random() + '") !important; }';
+					var css = '#navigator-throbber[loading] { list-style-image: url("' + fileuri + '#' + Math.random() + '") !important; }';
 					var newURIParam = {
 						aURL: 'data:text/css,' + encodeURIComponent(css),
 						aOriginCharset: null,

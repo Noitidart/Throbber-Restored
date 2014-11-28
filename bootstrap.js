@@ -303,11 +303,6 @@ function startup(aData, aReason) {
 	}
 	
 	try {
-		//CustomizableUI.removeWidgetFromArea('navigator-throbber'); //have to do this because its the fix for issue #11, its weird how it doesnt affect all people, probably something to do with CTR
-	} catch (ex) {
-		console.info('on remove widge of old id ran into ex:', ex);
-	}
-	try {
 		CustomizableUI.removeWidgetFromArea('throbber-restored'); //have to do this because its the fix for issue #11, its weird how it doesnt affect all people, probably something to do with CTR
 	} catch (ex) {
 		console.info('on remove widge of old id ran into ex:', ex);
@@ -362,6 +357,7 @@ function shutdown(aData, aReason) {
 	windowListener.unregister();
 	console.log('s1');
 	CustomizableUI.destroyWidget('navigator-throbber');
+	//CustomizableUI.removeWidgetFromArea('navigator-throbber');
 	console.log('s2');
 	myServices.sss.unregisterSheet(cssUri, myServices.sss.USER_SHEET); //running htis last as i think its syncronus
 	console.log('s3');

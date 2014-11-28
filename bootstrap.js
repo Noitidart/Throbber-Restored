@@ -12,8 +12,8 @@ var cssUri_CustomImgIdle;
 var cssUri_CustomImgLoading;
 
 Cu.import('resource://gre/modules/Services.jsm');
+Cu.import('resource:///modules/CustomizableUI.jsm');
 
-Cu.import('resource://gre/modules/devtools/Console.jsm');
 Cu.import('resource://gre/modules/XPCOMUtils.jsm');
 Cu.import('resource://gre/modules/osfile.jsm');
 Cu.import('resource://gre/modules/FileUtils.jsm');
